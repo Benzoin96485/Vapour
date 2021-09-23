@@ -117,6 +117,40 @@ def eval_rows(rows, start):
         return list(map(lambda x:x-start, evaled))
 
 
+def find_data():
+    import getpass
+    username = getpass.getuser()
+    data_path = ''
+    
+    prefix_list = ["./",
+        "./WXI-05_DATA/", 
+        "C:/Users/{}/Documents/WXI-05_DATA/".format(username), 
+        "C:/Users/{}/文档/WXI-05_DATA/".format(username), 
+        "C:/Users/{}/OneDrive/文档/WXI-05_DATA/".format(username), 
+        "C:/Users/{}/OneDrive/Documents/WXI-05_DATA/".format(username),
+        "D:/Users/{}/Documents/WXI-05_DATA/".format(username), 
+        "D:/Users/{}/文档/WXI-05_DATA/".format(username), 
+        "D:/Users/{}/OneDrive/文档/WXI-05_DATA/".format(username), 
+        "D:/Users/{}/OneDrive/Documents/WXI-05_DATA/".format(username),
+    ]
+
+    for prefix in prefix_list:
+        try:
+            print("正在尝试从 {} 中寻找数据文件夹".format(prefix))
+            os.listdir(prefix)
+            data_path = recent_data(prefix)
+        except FileNotFoundError:
+            continue
+        else:
+            break
+
+    if data_path:
+        return prefix + data_path
+    else:
+        print("未找到数据文件，程序退出")
+        exit()
+
+
 def recent_data(prefix):
     oslist = os.listdir(prefix)
     pattern = r'\d+\-\d+\-\d+ \& (\d+)\-(\d+)\-(\d+)Hold\.txt'
@@ -125,15 +159,17 @@ def recent_data(prefix):
     for filename in oslist:
         match = re.match(pattern, filename)
         if match:
-            print("已找到 {}".format(prefix + "/" + filename))
+            print("已找到 {}".format(prefix + filename))
             time = match.groups()
             second = int(time[2]) + int(time[1]) * 60 + int(time[0]) * 3600
             if second > recent_time:
                 recent_time = second
                 recent_file = filename
     if recent_file:
-        print("最新数据文件为 {}".format(prefix + "/" + recent_file))
-    return recent_file        
+        print("最新数据文件为 {}".format(prefix + recent_file))
+        return recent_file 
+    else:
+        raise FileNotFoundError
 
 
 def latexize(df: pd.DataFrame, column_num=1):
@@ -195,52 +231,24 @@ def latex_insert(tablelist, path=''):
     file.write(content)
     file.close()
 
+
 def main():
     FLAGS = parseArgs()
-    data_path = FLAGS.dataPath
     if FLAGS.dataPath:
-        with open(data_path, 'r', encoding=target_encoding) as f:
-            lines = f.readlines()
+        data_path = FLAGS.dataPath
     else:
-        prefix = '.'
-        print("正在尝试从当前文件夹中寻找最新数据文件")
-        data_path = recent_data(prefix)
-        if not data_path:
-            print("正在尝试从 C:/Users/$Username$/Document/WXI-05_DATA 中寻找数据文件夹")
-            import getpass
-            prefix = "C:/Users/" + getpass.getuser() + "/文档/WXI-05_DATA"
-            try:
-                try:
-                    os.listdir(prefix)
-                except:
-                    prefix = "C:/Users/" + getpass.getuser() + "/Documents/WXI-05_DATA"
-                data_path = recent_data(prefix)
-                if not data_path:
-                    raise FileNotFoundError
-            except FileNotFoundError:
-                print("正在尝试从 C:/Users/$Username$/OneDrive/Document/WXI-05_DATA 中寻找数据文件夹")
-                prefix = "C:/Users/" + getpass.getuser() + "/OneDrive/文档/WXI-05_DATA"
-                try:
-                    try:
-                        os.listdir(prefix)
-                    except:
-                        prefix = "C:/Users/" + getpass.getuser() + "/Documents/WXI-05_DATA"
-                    data_path = recent_data(prefix)
-                    if not data_path:
-                        raise FileNotFoundError
-                except FileNotFoundError:
-                    print("未找到数据文件，程序退出")
-                    exit()
-        data_path = prefix + "/" + data_path
+        data_path = find_data()
     
-    with open(data_path, encoding=target_encoding) as f:
+    with open(data_path, 'r', encoding=target_encoding) as f:
         lines = f.readlines()
 
-    index1 = lines[0].find("temperature")
-    index2 = lines[0][index1:].find(')')
-    start_index = index1 + index2 + 1
-    lines[0] = lines[0][start_index:]
-    entries = map(lambda x: x.split(), lines)
+    entries = []
+    data_pattern = r"\D*(\d+\:\d+\:\d+\.\d+)\s+(\d+\.\d+)KPa\s+(\d+\.\d+).*"
+    for line in lines:
+        match = re.match(data_pattern, line)
+        if match:
+            entries.append(match.groups())
+    
     columns = list(zip(*entries))
     
     df = pd.DataFrame()
