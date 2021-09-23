@@ -6,7 +6,7 @@ import os
 import re
 
 target_encoding = 'gb2312'
-
+version = "1.2"
 
 def parseArgs():
     parser = argparse.ArgumentParser()
@@ -75,6 +75,12 @@ def parseArgs():
         type=int,
         default=1,
         help="行数的起始计数"
+    )
+    parser.add_argument(
+        "--figPath",
+        type=str,
+        default="./1.png",
+        help="保存拟合图片的路径"
     )
     flags, unparsed = parser.parse_known_args()
     return flags
@@ -185,7 +191,7 @@ def latexize(df: pd.DataFrame, column_num=1):
     out = []
     out.append(r"\begin{tabular}{" + "|".join(["ccc"] * column_num) + "}")
     out.append(r"\toprule")
-    out.append("\t&\t".join(["序号\t&\t沸点 $T$/\si{^\circ C}\t&\t压强 $p$/\si{kPa}"] * column_num) + "\t\\\\")
+    out.append("\t&\t".join(["序号\t&\t压强 $p$/\si{kPa}\t&\t沸点 $T$/\si{^\circ C}"] * column_num) + "\t\\\\")
     out.append(r"\midrule")
     for line in tabular:
         if line:
@@ -233,6 +239,10 @@ def latex_insert(tablelist, path=''):
 
 
 def main():
+    print("\n当前版本号为 {}，请到 https://github.com/Benzoin96485/Vapour 检查是否为最新版。".format(version))
+    
+    print("\n作者不对输出结果的正确性和有效性，以及其连带的后果负责。\n\n")
+    print("-" * 100)
     FLAGS = parseArgs()
     if FLAGS.dataPath:
         data_path = FLAGS.dataPath
@@ -272,7 +282,7 @@ def main():
         p = p_trans(df["pressure(kPa)"], logstr=FLAGS.log)
         t = t_trans(df["temperature(°C)"])
         k, b, r2 = linear_regression(t, p)
-        print("回归直线方程为 log p/p0={}/(T/K)+{}，复相关系数平方为 {}".format(k, b, r2))
+        print("回归直线方程为 {} p/p0=-{}/(T/K)+{}，复相关系数平方为 {}".format(FLAGS.log, k, b, r2))
 
         if eval(FLAGS.draw):
             import matplotlib
@@ -284,29 +294,31 @@ def main():
                     'weight' : 'medium',
                     'size' : 10,
                     'style' : 'normal'}
-            font2 = {'family' : 'Arial',
-                    'weight' : 'medium',
-                    'size' : 12,
-                    'style' : 'normal'}
             plt.rcParams['mathtext.fontset'] = 'custom'
-            plt.rcParams['mathtext.rm'] = 'Arial'
-            plt.rcParams['mathtext.it'] = 'Arial'
             plt.rc('font', **font)
+            #plt.rc('font2', **font2)
+            plt.rcParams['mathtext.rm'] = 'Arial:normal'
+            plt.rcParams['mathtext.it'] = 'Arial:italic'
             plt.rcParams['xtick.direction'] = 'in'
             plt.rcParams['ytick.direction'] = 'in'
             #print(plt.rcParams)
 
             plt.figure(1)
             ax=plt.gca()
+            
+            ax.text(-0.0028,-0.1,r"$\ln\dfrac{p}{p^\ominus} = -\dfrac{" + "{:.6}".format(k) + r"}{T/\mathrm{K}}+" + "{:.6}".format(b) + r",\quad r^2=" + "{:.5}".format(r2) + r"$" ,fontsize=12)
+
             ax.spines['bottom'].set_linewidth(1)
             ax.spines['left'].set_linewidth(1)
             ax.spines["top"].set_visible(False)
             ax.spines["right"].set_visible(False)
-            plt.xlabel(r'$\dfrac{1}{T}\,/\, (\mathrm{K}^{-1})$', fontdict=font2)
-            plt.ylabel(r'$\ln \dfrac{p}{p^\ominus}$', fontdict=font2)
+            plt.xlabel(r'$-(1/T)\,/\, (\mathrm{K}^{-1})$', size=12)
+            plt.ylabel(r'$\ln(p/p^\ominus)$', size=12)
             plt.scatter(t, p)
             plt.plot(x, y, linewidth=2)
+            plt.savefig(FLAGS.figPath)
             plt.show()
+            
 
 if __name__ == "__main__":
     main()
