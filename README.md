@@ -3,15 +3,28 @@
 
 ![Version](https://img.shields.io/badge/Version-1.1-blue.svg)
 
-版本 1.1 更新内容
+版本 1.2 更新内容
 	
+bug 修复
+
+1. 大量琐碎的画图问题
+2. 输出的latex表格温度标签和压力标签写反
+
 新增功能
-1. 使得所绘制的直线拟合图符合物化实验报告的要求
+1. 在图中显示直线方程和r<sup>2</sup>
+2. 保存图片到指定位置
 
 <details>
 <summary>展开查看更久远的更新日志</summary>
 
- ---	
+ ---
+	
+版本 1.1 更新内容
+	
+新增功能
+1. 使得所绘制的直线拟合图符合物化实验报告的要求	
+	
+---
 	
 版本 1.05 更新内容
 	
@@ -79,7 +92,7 @@ E:\coding\py\vapour_pressure>
 运行小助手时通过命令行参数来选择不同功能，最繁冗的命令是
 
 ```
-python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1 --latex="output" --latexfile='' --columns=1
+python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1 --latex="output" --latexfile='' --columns=1 --figPath=./1.png
 ```
 
 所有以双横杠 `--` 开头，空格分割的字段都可以选择不写（上面写的都是默认值，不写的话将按照以上参数执行），而如果写了，它们的作用如下：
@@ -189,3 +202,6 @@ True开启画图功能（结果弹窗显示，请自行保存，未设置规范�
 
 #### --columns
 如果数据过多，单栏表格会过长而不美观。这里可以设置分栏的栏数，如 `--columns=2` 就会输出一个能渲染成两栏三线表的代码，以上示例中出现的就是两栏代码。
+
+#### --figPath
+用于保存拟合图片的路径
