@@ -1,7 +1,7 @@
 # Vapour
 北京大学化学与分子工程学院《物理化学实验》课程《液体饱和蒸气压的测定》实验现场数据处理小助手
 
-![Version](https://img.shields.io/badge/Version-1.1-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.2-blue.svg)
 
 版本 1.2 更新内容
 	
