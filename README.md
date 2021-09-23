@@ -1,12 +1,18 @@
 # Vapour
 北京大学化学与分子工程学院《物理化学实验》课程《液体饱和蒸气压的测定》实验现场数据处理小助手
 
-![Version](https://img.shields.io/badge/Version-1.05-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.1-blue.svg)
 
+版本 1.1 更新内容
+	
+新增功能
+1. 使得所绘制的直线拟合图符合物化实验报告的要求
 
 <details>
-<summary>展开查看更新日志</summary>
+<summary>展开查看更久远的更新日志</summary>
 
+ ---	
+	
 版本 1.05 更新内容
 	
 bug 修复
@@ -37,7 +43,7 @@ bug 修复
 
 1. 将温度-压力计采集的 Hold 数据转换为容易编辑的csv格式，方便excel、origin等软件打开
 2. 给出拟合直线方程和复相关系数平方
-3. 画出数据散点和拟合直线草图
+3. 画出数据散点和拟合直线图，符合物化实验报告规范
 4. 输出 latex 表格代码，可以插入到`.tex`文件中
 
 
