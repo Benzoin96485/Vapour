@@ -1,10 +1,8 @@
 # Vapour
 北京大学化学与分子工程学院《物理化学实验》课程《液体饱和蒸气压的测定》实验现场数据处理小助手
-[https://img.shields.io/badge/Version-1.05-blue]
 
-\Version
+![Version](https://img.shields.io/badge/Version-1.05-blue.svg)
 
-> 开发极为仓促，bug 可能很多，只保证在 windows 平台可用
 
 <details>
 <summary>展开查看更新日志</summary>
@@ -75,7 +73,7 @@ E:\coding\py\vapour_pressure>
 运行小助手时通过命令行参数来选择不同功能，最繁冗的命令是
 
 ```
-python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1
+python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1 --latex="output" --latexfile='' --columns=1
 ```
 
 所有以双横杠 `--` 开头，空格分割的字段都可以选择不写（上面写的都是默认值，不写的话将按照以上参数执行），而如果写了，它们的作用如下：
