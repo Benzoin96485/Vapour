@@ -275,11 +275,37 @@ def main():
         print("回归直线方程为 log p/p0={}/(T/K)+{}，复相关系数平方为 {}".format(k, b, r2))
 
         if eval(FLAGS.draw):
+            import matplotlib
             import matplotlib.pyplot as plt
             x = np.linspace(min(t), max(t), 1000)
             y = k * x + b
+
+            font = {'family' : 'Arial',
+                    'weight' : 'medium',
+                    'size' : 10,
+                    'style' : 'normal'}
+            font2 = {'family' : 'Arial',
+                    'weight' : 'medium',
+                    'size' : 12,
+                    'style' : 'normal'}
+            plt.rcParams['mathtext.fontset'] = 'custom'
+            plt.rcParams['mathtext.rm'] = 'Arial'
+            plt.rcParams['mathtext.it'] = 'Arial'
+            plt.rc('font', **font)
+            plt.rcParams['xtick.direction'] = 'in'
+            plt.rcParams['ytick.direction'] = 'in'
+            #print(plt.rcParams)
+
+            plt.figure(1)
+            ax=plt.gca()
+            ax.spines['bottom'].set_linewidth(1)
+            ax.spines['left'].set_linewidth(1)
+            ax.spines["top"].set_visible(False)
+            ax.spines["right"].set_visible(False)
+            plt.xlabel(r'$\dfrac{1}{T}\,/\, (\mathrm{K}^{-1})$', fontdict=font2)
+            plt.ylabel(r'$\ln \dfrac{p}{p^\ominus}$', fontdict=font2)
             plt.scatter(t, p)
-            plt.plot(x, y)
+            plt.plot(x, y, linewidth=2)
             plt.show()
 
 if __name__ == "__main__":
