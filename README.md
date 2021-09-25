@@ -123,6 +123,7 @@ C:\Users\$Username$\Documents\
 C:\Users\$Username$\Onedrive\文档\
 C:\Users\$Username$\Onedrive\Documents\
 ```
+以及在D盘的类似文件夹
 
 #### --ignoreRows
 
