@@ -6,7 +6,7 @@ import os
 import re
 
 target_encoding = 'gb2312'
-version = "1.2"
+version = "1.3"
 
 def parseArgs():
     parser = argparse.ArgumentParser()
@@ -43,7 +43,7 @@ def parseArgs():
     parser.add_argument(
         '--latex',
         type=str,
-        default="output",
+        default="",
         help="输出latex表格代码"
     )
     parser.add_argument(
@@ -82,6 +82,12 @@ def parseArgs():
         default="./1.png",
         help="保存拟合图片的路径"
     )
+    parser.add_argument(
+        "--logfit",
+        type=str,
+        default="False",
+        help="使用含对数项的拟合"
+    )
     flags, unparsed = parser.parse_known_args()
     return flags
 
@@ -106,13 +112,35 @@ def p_trans(p, logstr):
     elif logstr == 'log':
         return np.log10(p / 100)
 
+def t_trans2(t):
+    return np.log(t + 273.15)
+
             
 def linear_regression(X, Y):
     coeff = np.polyfit(X, Y, 1)
     Xbar = np.average(X)
     Ybar = np.average(Y)
-    r2 = (np.sum((X - Xbar) * (Y - Ybar))) ** 2 / (np.sum((X - Xbar) ** 2) * np.sum((Y - Ybar) ** 2))
-    return coeff[0], coeff[1], r2
+    Sxx = np.sum((X - Xbar) ** 2)
+    Syy = np.sum((Y - Ybar) ** 2)
+    Sxy = np.sum((X - Xbar) * (Y - Ybar))
+    k = Sxy / Sxx
+    b = Ybar - k * Xbar
+    r2 = Sxy ** 2 / (Sxx * Syy)
+    Sr = np.sqrt((Syy - k * k * Sxx) / (X.shape[0] - 2))
+    Sk = Sr ** 2 / Sxx
+    print("Y 平均值 {}, X 差方和 {}".format(Ybar, Sxx))
+    print("回归标准差 {}，斜率标准差 {}".format(Sr, Sk))
+    return k, b, r2
+
+
+def linear_regression2(X1, X2, Y):
+    from sklearn.linear_model import LinearRegression
+    X = pd.concat([X1, X2], axis=1)
+    model = LinearRegression()
+    model.fit(X, Y)
+    k1, k2 = model.coef_[0], model.coef_[1]
+    b = model.intercept_
+    return k1, k2, b
 
 
 def eval_rows(rows, start):
@@ -238,6 +266,10 @@ def latex_insert(tablelist, path=''):
     file.close()
 
 
+def sign(num):
+    return '+' if num >= 0 else '-'
+
+
 def main():
     print("\n当前版本号为 {}，请到 https://github.com/Benzoin96485/Vapour 检查是否为最新版。".format(version))
     
@@ -276,13 +308,20 @@ def main():
     elif FLAGS.latex == "insert":
         texfile = FLAGS.latexfile
         latex_insert(table, texfile)
+    else:
+        print(df)
     df.to_csv(FLAGS.csvPath, encoding=FLAGS.csvEncoding)
     
     if eval(FLAGS.regress):
         p = p_trans(df["pressure(kPa)"], logstr=FLAGS.log)
         t = t_trans(df["temperature(°C)"])
         k, b, r2 = linear_regression(t, p)
-        print("回归直线方程为 {} p/p0=-{}/(T/K)+{}，复相关系数平方为 {}".format(FLAGS.log, k, b, r2))
+        print("回归直线方程为 {} p/p0 = {}/(T/K) {} {}，复相关系数平方为 {}".format(FLAGS.log, -k, sign(b), abs(b), r2))
+
+        if eval(FLAGS.logfit):
+            t2 = t_trans2(df["temperature(°C)"])
+            k1, k2, b = linear_regression2(t, t2, p)
+            print("含对数项的回归方程为 {} p/p0 = {}/(T/K) {} {} {} {} ln (T/K)".format(FLAGS.log, -k1, sign(b), abs(b), sign(k2), abs(k2)))
 
         if eval(FLAGS.draw):
             import matplotlib
@@ -296,7 +335,6 @@ def main():
                     'style' : 'normal'}
             plt.rcParams['mathtext.fontset'] = 'custom'
             plt.rc('font', **font)
-            #plt.rc('font2', **font2)
             plt.rcParams['mathtext.rm'] = 'Arial:normal'
             plt.rcParams['mathtext.it'] = 'Arial:italic'
             plt.rcParams['xtick.direction'] = 'in'
@@ -304,9 +342,12 @@ def main():
             #print(plt.rcParams)
 
             plt.figure(1)
-            ax=plt.gca()
+            ax = plt.gca()
+
+            text_y = max(p) - (max(p) - min(p)) / 8
+            text_x = min(t) + (max(t) - min(t)) / 10
             
-            ax.text(-0.0028,-0.1,r"$\ln\dfrac{p}{p^\ominus} = -\dfrac{" + "{:.6}".format(k) + r"}{T/\mathrm{K}}+" + "{:.6}".format(b) + r",\quad r^2=" + "{:.5}".format(r2) + r"$" ,fontsize=12)
+            ax.text(text_x, text_y, r"$\ln\dfrac{p}{p^\ominus} = -\dfrac{" + "{:.6}".format(k) + r"}{T/\mathrm{K}}+" + "{:.6}".format(b) + r",\quad r^2=" + "{:.5}".format(r2) + r"$", fontsize=12)
 
             ax.spines['bottom'].set_linewidth(1)
             ax.spines['left'].set_linewidth(1)
