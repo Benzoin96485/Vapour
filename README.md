@@ -1,8 +1,25 @@
 # Vapour
 北京大学化学与分子工程学院《物理化学实验》课程《液体饱和蒸气压的测定》实验现场数据处理小助手
 
-![Version](https://img.shields.io/badge/Version-1.2-blue.svg)
+![Version](https://img.shields.io/badge/Version-1.3-blue.svg)
 
+版本 1.3 更新内容
+
+bug 修复
+
+1. 图中的直线方程位置位于图片之外
+2. 命令行中输出的回归方程有多个连续正负号
+
+新增功能
+
+1. 输出回归的必要统计量，以便计算各类不确定度
+2. 提供了对数回归选项，用于更精密的分析
+
+<details>
+<summary>展开查看更久远的更新日志</summary>
+
+ ---	
+	
 版本 1.2 更新内容
 	
 bug 修复
@@ -13,10 +30,7 @@ bug 修复
 新增功能
 1. 在图中显示直线方程和r<sup>2</sup>
 2. 保存图片到指定位置
-
-<details>
-<summary>展开查看更久远的更新日志</summary>
-
+	
  ---
 	
 版本 1.1 更新内容
@@ -92,7 +106,7 @@ E:\coding\py\vapour_pressure>
 运行小助手时通过命令行参数来选择不同功能，最繁冗的命令是
 
 ```
-python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1 --latex="output" --latexfile='' --columns=1 --figPath=./1.png
+python transformer.py --dataPath='' --ignoreRows=[] --csvPath='./data.csv' --csvEncoding='gb2312' --regress=True --draw==True --log=ln --startRow=1 --latex="output" --latexfile='' --columns=1 --figPath=./1.png --logfit=False
 ```
 
 所有以双横杠 `--` 开头，空格分割的字段都可以选择不写（上面写的都是默认值，不写的话将按照以上参数执行），而如果写了，它们的作用如下：
@@ -205,3 +219,10 @@ True开启画图功能（结果弹窗显示，请自行保存，未设置规范�
 
 #### --figPath
 用于保存拟合图片的路径
+
+#### --logfit
+`--logfit=True` 时补充以下公式的拟合结果：
+
+![](http://latex.codecogs.com/gif.latex?\\ln\frac{p}{p^\ominus}=-\frac{A}{T}+B+C\ln{T/\mathrm{K}})
+
+
